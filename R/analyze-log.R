@@ -119,7 +119,6 @@ getMaxConcurrent <- function(eventLog) {
 #' @return A data frame with time stamps and the number of concurrent
 #'   connections for each time stamp
 #'
-#' @importFrom lubridate %within% force_tz
 #' @export
 getConcurrentOverTest <- function(eventLog) {
 
@@ -229,6 +228,7 @@ getSetInputTimes <- function(eventLog) {
 #'   scheduler should be updated.
 #' @export
 getConnectionsPerR <- function(eventLog) {
+
   ids <- unique(eventLog$workerid)
   result <- getEventInterval(eventLog, "Shiny app started",
                              "Closing PhantomJS session", workerId = TRUE)
