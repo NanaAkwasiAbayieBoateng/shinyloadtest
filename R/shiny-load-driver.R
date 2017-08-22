@@ -99,11 +99,19 @@ ShinyLoadDriver <- R6Class("ShinyLoadDriver",
     },
 
     ## adds the connection id
+    ## writes result to disk and prints result
     getEventLog = function(){
       log <- super$getEventLog()
       log$connection <- private$connection_id
       log$process <- Sys.getpid()
-      log
+
+      current_dir  <- paste0(self$getSnapshotDir(), "-timing")
+      if (!dir_exists(current_dir)) {
+        dir.create(current_dir, recursive = TRUE)
+      }
+      fpath <- file.path(current_dir, private$connection_id)
+      saveRDS(object = log, file = fpath)
+      print(fpath)
     },
 
     ## new functions

@@ -5,8 +5,7 @@
 \title{Run load tests for a Shiny application}
 \usage{
 loadTest(testFile = "./tests/myloadtest.R", url = NULL, numConcurrent = 4,
-  numTotal = numConcurrent, loadTimeout = 5, stagger = 5,
-  phantomTimeout = 10)
+  testDurationSec = 360)
 }
 \arguments{
 \item{testFile}{The file containing a test script to run. Test script can be
@@ -16,35 +15,24 @@ generated from \code{recordTest(load_mode = TRUE)}.}
 
 \item{numConcurrent}{Number of concurrent connections to simulate.}
 
-\item{numTotal}{Total number of connections to simulation.}
-
-\item{loadTimeout}{Maximum time to wait to connect to the Shiny app (sec)}
-
-\item{stagger}{Concurrent connections are staggered by pausing for a random,
-uniformally distributed period of time before starting the connection. This
-parameter is the maximum amount of time (sec) to wait. A value of 0 means
-that no staggering will occur.}
-
-\item{phantomTimeout}{Number of seconds to wait for the slave phantomJS
-processes to start. Default to 10 seconds.}
+\item{testDurationSec}{Total length of test. Best practice is to run tests
+for > 3x the time of an individual session}
 }
 \value{
-Returns a list with the results from each child process. The results
-  will either be a data frame with the event log from the test or an error
-  message.
+Returns a list with two entries, a data frame with timing information
+  for successful sessions and a numeric entry with the number of failed
+  sessions.
 }
 \description{
 Run load tests for a Shiny application
 }
 \details{
 This function simulates load against a deployed Shiny app. The
-  function creates a cluster of workers using the parallel function
-  \code{makePSOCKcluster}. The number of works is equal to the number of
-  desired concurrent connections. Each worker launches a phantomJS process
-  that calls the URL and drives the app through the test. Tests should be
-  generated using the \code{recordTest} function with \code{load_mode =
-  TRUE}. Timing information is aggregated and returned as a data frame. If
-  the number of total tests > number of concurrent tests, then finished
-  workers will be recycled to complete remaining tests.The phantomJS process
-  is reused, but a new browser session is started for each test.
+  function creates \code{numConcurrent} parallel processes that each launch a
+  phantomJS process that browses to \code{url} and drives the app through the
+  \code{testFile}. Tests should be generated using the \code{recordTest}
+  function with \code{load_mode = TRUE}. Timing information for each process
+  is written to a directory and then aggregated and returned.
+  \code{numConcurrent} connections are maintained for \code{testDurationSec}
+  seconds.
 }

@@ -14,14 +14,12 @@ LazyData: true
 RoxygenNote: 6.0.1
 Imports:
     assertthat,
-    foreach,
-    doParallel,
     shinytest,
     R6,
-    withr,
     miniUI,
     rstudioapi,
-    shiny
+    shiny,
+    processx
 Suggests: rmarkdown,
     dplyr,
     ggplot2,

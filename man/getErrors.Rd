@@ -8,13 +8,13 @@ getErrors(eventLog)
 }
 \arguments{
 \item{eventLog}{Returned from \code{\link{loadTest}}. The \code{eventLog} is
-a list composed of data frames (from successful tests) and potnetially errors.}
+a list composed of a data frame with timing from successful sessions and a
+numeric with the number of failed sessions.}
 }
 \description{
 Get errors from event log
 }
 \details{
-Given an \code{eventLog} containing successesful test results (data
-  frames) and error messages, this function returns the error messages in a
-  list. See \code{\link{getSuccesses}}
+Given an \code{eventLog}, this function returns the number of failed
+  sessions.
 }

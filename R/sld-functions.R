@@ -18,7 +18,7 @@ sld_snapshot <- function(self, private) {
 
   current_dir  <- paste0(self$getSnapshotDir(), "-results")
 
-  filename <- sprintf("%03d_%03d.png", private$connection_id,
+  filename <- sprintf("%s_%03d.png", private$connection_id,
                 private$snapshotCount)
 
   if (private$snapshotCount == 1) {

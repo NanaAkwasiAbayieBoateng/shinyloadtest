@@ -8,26 +8,17 @@ params:
     label: "Deployed URL"
     value: "https://"
   concurrent:
-    label: "Load Test: Number of Concurrent Connections"
+    label: "Number of Concurrent Connections"
     value: 4
-  total: 
-    label: "Load Test: Total Number of Connections"
-    value: 4
+  duration:
+    label: "Duration of Test (secs)"
+    value: 360
   baseline:
-    label: "Baseline Test: Total Number Sequential Connections"
-    value: 4
+    label: "Duration of Baseline Test (secs)"
+    value: 60
   testFile:
     label: "Path to Load Test Script"
     value: "./tests/myloadtest.R"
-  stagger: 
-    label: "Maximum Delay in Staggering Concurrent Connections (sec)"
-    value: 5
-  loadTimeout:
-    label: "Maximum time to wait for the Shiny app to load (sec)"
-    value: 15
-  phantomTimeout:
-    label: "Maximum time to wait for phantomJS to start (sec)"
-    value: 30
 ---
 
 ```{r setup, include=FALSE}
@@ -36,28 +27,23 @@ library(shinyloadtest)
 library(ggplot2)
 ```
 
-Load test run against `r params$url`. The load test target was **`r params$total` total visits** with **`r params$concurrent` concurrent users** at a time. Concurrent user sessions were staggered, with a max delay of `r params$stagger` seconds. Each "user" ran a series of actions against the application as recorded in `r params$testFile`.
+Load test run against `r params$url`. The load test target was **`r params$concurrent` concurrent visits** for **`r params$duration/60` minutes.** Each "user" ran a series of actions against the application as recorded in `r params$testFile`.
 
 ```{r runTest, warning = FALSE}
 loadTestLog <- loadTest(testFile = params$testFile, 
                         url = params$url,
                         numConcurrent = params$concurrent,
-                        numTotal = params$total, 
-                        loadTimeout = params$loadTimeout,
-                        stagger = params$stagger,
-                        phantomTimeout = params$phantomTimeout)
+                        testDurationSec = params$duration)
 saveRDS(loadTestLog, file = "loadTestLog.Rds")
 ```
 
-A baseline test was run with **`r params$baseline` total visits** occuring sequentially, one at a time.
+A baseline test was run for **`r params$baseline/60` minute(s) ** with 1 concurrent session at a time.
 
 ```{r}
 baselineLog <- loadTest(testFile = params$testFile, 
                         url = params$url,
                         numConcurrent = 1,
-                        loadTimeout = params$loadTimeout,
-                        numTotal = params$baseline, 
-                        stagger = 0)
+                        testDurationSec = params$baseline)
 saveRDS(baselineLog, file = "baselineLog.Rds")
 ```
 
@@ -74,27 +60,47 @@ baselineLog <- getSuccesses(baselineLog)
 ```
 
 
-The load test was started at `r min(loadTestLog$time)` and ended at `r max(loadTestLog$time)`. Of the targetted `r params$total` visits, `r length(unique(loadTestLog$connection))` were successful. 
+The load test was started at `r min(loadTestLog$time)` and ended at `r max(loadTestLog$time)`.`r length(unique(loadTestLog$connection))` total connections were successful. 
 
 ```{r}
-if (length(errors) > 0) {
-  print("The following errors occured in the unsuccessful visits:")
-  print(errors)
+if (errors > 0) {
+  print(paste0("There were ", errors, " unsuccessful sessions during the load test."))
+  
 }
 
-if (length(baseline_errors) > 0) {
-  print("The following errors occured in the baseline test:")
-  print(baseline_errors)
+if (baseline_errors > 0) {
+  print(paste0("There were ", errors, " unsuccessful sessions during the baseline test."))
+  
 }
-
 ```
 
 A maximum `r getMaxConcurrent(loadTestLog)` concurrent connections were achieved, compared to the target of `r params$concurrent`.
 
-`r if ( length(errors) == 0 && (getMaxConcurrent(loadTestLog) < params$concurrent)) {message("Because all visits were successful, but the number of concurrent connections did not meet the target, consider lowering the stagger parameter or checking the server settings.")}`
+## Sustained Concurrent Connections
 
+```{r concurrent_over_time}
+res <- getConcurrentOverTest(loadTestLog)
+
+ggplot(res, aes(x = time, y = connections)) + 
+  geom_point(alpha = 0.25) + 
+  geom_smooth() +
+  geom_hline(yintercept = params$concurrent, color = "maroon") +
+  theme_minimal() +
+  labs(
+    title = "Connections Over Time vs Target",
+    x = "",
+    y = ""
+  )
+```
 
 ## Comparison to Baseline
+
+**Trimming** For all data comparisons, a burn-in sample of the first `r 2*params$concurrent` connections were removed from the load test log.
+
+```{r trim}
+loadTestLog <- trimRampUp(loadTestLog, 2*params$concurrent)
+```
+
 
 ```{r}
 load <- getPageLoadTimes(loadTestLog) 
