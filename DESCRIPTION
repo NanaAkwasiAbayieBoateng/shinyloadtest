@@ -19,7 +19,8 @@ Imports:
     miniUI,
     rstudioapi,
     shiny,
-    processx
+    processx,
+    lubridate
 Suggests: rmarkdown,
     dplyr,
     ggplot2,

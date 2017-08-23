@@ -45,11 +45,6 @@ getErrors <- function(eventLog){
 #' @export
 getEventInterval <- function(eventLog, startEvent, endEvent, workerId = TRUE) {
 
-  if (!requireNamespace("lubridate", quietly = TRUE)) {
-    stop("lubridate needed for this function to work. Please install it.",
-         call. = FALSE)
-  }
-
   assert_that(startEvent %in% eventLog$event)
   assert_that(endEvent %in% eventLog$event)
 
@@ -118,7 +113,7 @@ getMaxConcurrent <- function(eventLog) {
 #'
 #' @return A data frame with time stamps and the number of concurrent
 #'   connections for each time stamp
-#'
+#' @importFrom lubridate %within%
 #' @export
 getConcurrentOverTest <- function(eventLog) {
 
@@ -181,11 +176,6 @@ getTestDurations <- function(eventLog) {
 #' @return Data frame containing a unique input id and event duration
 #' @export
 getSetInputTimes <- function(eventLog) {
-
-  if (!requireNamespace("lubridate", quietly = TRUE)) {
-    stop("lubridate needed for this function to work. Please install it.",
-         call. = FALSE)
-  }
 
 
   ## These come in pairs, so we need to do more work
