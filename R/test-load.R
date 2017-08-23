@@ -61,7 +61,7 @@ loadTest <- function(testFile = "./tests/myloadtest.R",
     }
 
     if (sum(active) < numConcurrent) {
-      cmd <- paste0("RScript -e \"library(shinyloadtest); options(target.url = '", url, "'); options(connection.id = '", c,"'); source('", testFile, "')\"")
+      cmd <- paste0("Rscript -e \"library(shinyloadtest); options(target.url = '", url, "'); options(connection.id = '", c,"'); source('", testFile, "')\"")
       tasks[[c]] <- processx::process$new(commandline = cmd, stdout = "|")
       active[c] <- 1
       c <- c + 1
