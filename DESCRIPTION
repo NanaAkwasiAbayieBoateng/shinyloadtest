@@ -16,12 +16,8 @@ Imports:
     assertthat,
     shinytest,
     R6,
-    miniUI,
-    rstudioapi,
-    shiny,
     processx,
     lubridate
 Suggests: rmarkdown,
     dplyr,
-    ggplot2,
-    lubridate
+    ggplot2
